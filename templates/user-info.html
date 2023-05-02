@@ -10,10 +10,17 @@
 <!-- Insert stuff about notes in the future -->
 <ul>
   {% for note in notes %}
-    <li><a href="/notes/{{note.id}}/update">{{note.title}}</a></li>
+    <li>
+      <a href="/notes/{{note.id}}/update">{{note.title}}</a>
+      <form action="/notes/{{note.id}}/delete" method="POST">
+        <button class="btn btn-danger">Delete Note</button>
+      </form>
+    </li>
   {% endfor %}
 </ul>
+
 <a class="btn btn-primary" href="/users/{{user.username}}/notes/add">Add Note</a>
+
 <form action="/users/{{user.username}}/delete" method="POST">
   <button class="btn btn-danger">Delete User</button>
 </form>

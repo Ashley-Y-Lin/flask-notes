@@ -16,16 +16,14 @@
       <a class="navbar-brand" href="/">Flask Notes</a>
       <div class="d-flex flex-fill justify-content-between">
         <ul class="navbar-nav d-flex flex-row">
-          {% if 'user_id' in session %}
-          <li><a href="/logout">Logout</a></li>
-
-          <form action="/logout" method="POST">
-            {{form.hidden_tag()}}
-            <button type="submit" class="btn btn-primary">Logout</button>
-          </form>
+          {% if 'username' in session %}
+            <!-- <form action="/logout" method="POST">
+              <button type="submit" class="btn btn-primary">Logout</button>
+            </form> -->
+          {% else %}
+            <li><a href="/login" class="btn btn-primary">Login</a></li>
+            <li><a href="/register" class="btn btn-primary">Register</a></li>
           {% endif %}
-          <li class="nav-item"><a class="nav-link" href="/users">Users</a></li>
-          <li class="nav-item ms-2"><a class="nav-link" href="/tags">Tags</a></li>
         </ul>
       </div>
     </div>
