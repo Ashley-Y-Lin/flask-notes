@@ -22,7 +22,7 @@ app.config["SECRET_KEY"] = "I'LL NEVER TELL!!"
 debug = DebugToolbarExtension(app)
 
 """Flask app for Flask Notes"""
-
+#TODO: separate different types of routes
 
 @app.get("/")
 def redirect_register():
@@ -30,7 +30,7 @@ def redirect_register():
 
     return redirect("/register")
 
-
+#TODO: catch if they are already logged in
 @app.route("/register", methods=["GET", "POST"])
 def register():
     """Produce register form or handle register."""
@@ -53,10 +53,10 @@ def register():
             last_name=last_name,
         )
 
-        session["username"] = user.username
-
         db.session.add(user)
         db.session.commit()
+
+        session["username"] = user.username
 
         return redirect(f"/users/{user.username}")
 
@@ -85,13 +85,13 @@ def login():
 
     return render_template("login.html", form=form)
 
-
+#TODO: change how we check if user is logged in
 @app.get("/users/<username>")
 def display_user_info(username):
     """Display information about the user with the given username.
     Ensure users are logged in to see the page, else redirect to /login."""
 
-    if "username" not in session:
+    if session["username"] not in session:
         flash("You must be logged in to view!")
         return redirect("/")
 
