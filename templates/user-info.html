@@ -8,5 +8,15 @@
 
 <h2>Notes</h2>
 <!-- Insert stuff about notes in the future -->
+<ul>
+  {% for note in notes %}
+    <li><a href="/notes/{{note.id}}/update">{{note.title}}</a></li>
+  {% endfor %}
+</ul>
+<a class="btn btn-primary" href="/users/{{user.username}}/notes/add">Add Note</a>
+<form action="/users/{{user.username}}/delete" method="POST">
+  <button class="btn btn-danger">Delete User</button>
+</form>
+
 
 {% endblock %}

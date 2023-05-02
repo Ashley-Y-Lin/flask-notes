@@ -22,7 +22,8 @@ app.config["SECRET_KEY"] = "I'LL NEVER TELL!!"
 debug = DebugToolbarExtension(app)
 
 """Flask app for Flask Notes"""
-#TODO: separate different types of routes
+
+#### Authentication Routes ###
 
 @app.get("/")
 def redirect_register():
@@ -30,10 +31,15 @@ def redirect_register():
 
     return redirect("/register")
 
-#TODO: catch if they are already logged in
 @app.route("/register", methods=["GET", "POST"])
 def register():
     """Produce register form or handle register."""
+
+
+    #Redirect if already logged in
+    if "username" in session:
+        username = session["username"]
+        return redirect(f"/users/{username}")
 
     form = AddNewUserForm()
 
@@ -62,10 +68,14 @@ def register():
 
     return render_template("register.html", form=form)
 
-
 @app.route("/login", methods=["GET", "POST"])
 def login():
     """Produce login form or handle login."""
+
+    #Redirect if already logged in
+    if "username" in session:
+        username = session["username"]
+        return redirect(f"/users/{username}")
 
     form = LoginUserForm()
 
@@ -85,21 +95,6 @@ def login():
 
     return render_template("login.html", form=form)
 
-#TODO: change how we check if user is logged in
-@app.get("/users/<username>")
-def display_user_info(username):
-    """Display information about the user with the given username.
-    Ensure users are logged in to see the page, else redirect to /login."""
-
-    if session["username"] not in session:
-        flash("You must be logged in to view!")
-        return redirect("/")
-
-    user = User.query.get_or_404(username)
-
-    return render_template("user-info.html", user=user)
-
-
 @app.post("/logout")
 def logout_user():
     """Log the user out and redirect to /."""
@@ -111,3 +106,46 @@ def logout_user():
         session.pop("username", None)
 
     return redirect("/")
+
+### User Routes ###
+
+@app.get("/users/<username>")
+def display_user_info(username):
+    """Display information about the user with the given username.
+    Ensure users are logged in to see the page, else redirect to /login."""
+
+    if "username" not in session:
+        if session["username"] != username:
+            flash("Invalid credentials!")
+        else:
+            flash("You must be logged in to view!")
+        return redirect("/")
+
+    user = User.query.get_or_404(username)
+
+    return render_template("user-info.html", user=user, notes=user.notes)
+
+@app.post("/users/<username>/delete")
+def delete_user(username):
+    """Deletes user from database and redirects to /"""
+    form = CSRFProtectForm()
+
+    if form.validate_on_submit:
+        user = User.query.get_or_404(username)
+        notes = user.notes
+
+        for note in notes:
+            db.session.delete(notes)
+
+        db.session.delete(user)
+        db.session.commit()
+
+        session.pop("username", None)
+
+        flash(f"{user.first_name} {user.last_name} deleted")
+
+    return redirect("/")
+
+### NOTES ROUTES ###
+
+@app.route("users/<username>/notes/add", methods)
