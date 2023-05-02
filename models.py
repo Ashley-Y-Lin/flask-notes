@@ -22,7 +22,7 @@ class User(db.Model):
 
     last_name = db.Column(db.String(30), nullable=False)
 
-    #TODO: implement error handling for duplicate emails
+    # TODO: implement error handling for duplicate emails
     @classmethod
     def register(cls, username, password, email, first_name, last_name):
         """Register user w/hashed password & return user."""
@@ -61,13 +61,15 @@ class Note(db.Model):
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
 
+    # TODO: always have a default of empty string if nullable = false
     title = db.Column(db.String(100), nullable=False)
 
     content = db.Column(db.Text, nullable=False)
 
     owner_username = db.Column(db.String(20), db.ForeignKey("users.username"))
 
-    user = db.Relationship('User', backref='notes')
+    user = db.Relationship("User", backref="notes")
+
 
 def connect_db(app):
     """Connect to database."""

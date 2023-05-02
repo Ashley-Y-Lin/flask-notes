@@ -17,7 +17,10 @@
       <div class="d-flex flex-fill justify-content-between">
         <ul class="navbar-nav d-flex flex-row">
           {% if 'username' in session %}
+            <!-- before every request, attach a csrf token to a flask object
+              called g -->
             <!-- <form action="/logout" method="POST">
+              <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}" />
               <button type="submit" class="btn btn-primary">Logout</button>
             </form> -->
           {% else %}

@@ -144,6 +144,8 @@ def delete_user(username):
 
     if form.validate_on_submit:
         user = User.query.get_or_404(username)
+
+        # TODO: make this not the n+1 query
         notes = user.notes
 
         for note in notes:
@@ -170,7 +172,7 @@ def display_or_add_note(username):
         flash("You must be logged in to add a note!")
         return redirect("/")
     elif session["username"] != username:
-        flash("Invalid login credentials!")
+        flash("Unauthorized user!")
         return redirect("/")
 
     form = AddNewNoteForm()
@@ -199,6 +201,9 @@ def edit_or_update_note(note_id):
 
     note = Note.query.get_or_404(note_id)
 
+    # TODO: make a decorator -- a function that returns a function to be called
+    # when a route is reached
+
     if "username" not in session:
         flash("You must be logged in to edit a note!")
         return redirect("/")
@@ -206,20 +211,15 @@ def edit_or_update_note(note_id):
         flash("Invalid login credentials!")
         return redirect("/")
 
-    form = EditNoteForm()
+    form = EditNoteForm(obj=note)
 
     if form.validate_on_submit():
-        note.title = form.title.data or note.title
-        note.content = form.content.data or note.content
+        note.title = form.title.data
+        note.content = form.content.data
 
-        db.session.add(note)
         db.session.commit()
 
         return redirect(f"/users/{note.owner_username}")
-
-    # pre-populating the form input
-    form.title.data = note.title
-    form.content.data = note.content
 
     return render_template("edit-note.html", form=form, note=note)
 
@@ -229,13 +229,12 @@ def delete_note(note_id):
     """Deletes note from database and redirects to /users/<username>"""
     form = CSRFProtectForm()
 
-    if form.validate_on_submit:
-        note = Note.query.get_or_404(note_id)
-        username = note.owner_username
+    note = Note.query.get_or_404(note_id)
 
+    if form.validate_on_submit:
         db.session.delete(note)
         db.session.commit()
 
         flash(f"{note.title} was deleted!")
 
-    return redirect(f"/users/{username}")
+    return redirect(f"/users/{note.owner_username}")
