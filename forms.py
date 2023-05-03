@@ -18,7 +18,6 @@ class AddNewUserForm(FlaskForm):
         validators=[
             InputRequired(),
             Length(max=50),
-            # TODO: is there a unique validator in WTForms to add here?
         ],
     )
 
@@ -52,4 +51,4 @@ class EditNoteForm(FlaskForm):
 
 
 class CSRFProtectForm(FlaskForm):
-    """Form just for CSRF Protection for delete"""
+    """Form just for CSRF Protection for delete or logout"""

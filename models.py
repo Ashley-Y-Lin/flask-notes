@@ -14,13 +14,13 @@ class User(db.Model):
 
     username = db.Column(db.String(20), primary_key=True)
 
-    password = db.Column(db.String(100), nullable=False)
+    password = db.Column(db.String(100), nullable=False, default="")
 
     email = db.Column(db.String(50), nullable=False, unique=True)
 
-    first_name = db.Column(db.String(30), nullable=False)
+    first_name = db.Column(db.String(30), nullable=False, default="")
 
-    last_name = db.Column(db.String(30), nullable=False)
+    last_name = db.Column(db.String(30), nullable=False, default="")
 
     # TODO: implement error handling for duplicate emails
     @classmethod
@@ -61,10 +61,9 @@ class Note(db.Model):
 
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
 
-    # TODO: always have a default of empty string if nullable = false
-    title = db.Column(db.String(100), nullable=False)
+    title = db.Column(db.String(100), nullable=False, default="")
 
-    content = db.Column(db.Text, nullable=False)
+    content = db.Column(db.Text, nullable=False, default="")
 
     owner_username = db.Column(db.String(20), db.ForeignKey("users.username"))
 

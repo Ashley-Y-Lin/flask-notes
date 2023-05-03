@@ -13,6 +13,7 @@
     <li>
       <a href="/notes/{{note.id}}/update">{{note.title}}</a>
       <form action="/notes/{{note.id}}/delete" method="POST">
+        {{ form.hidden_tag() }}
         <button class="btn btn-danger">Delete Note</button>
       </form>
     </li>
@@ -22,7 +23,13 @@
 <a class="btn btn-primary" href="/users/{{user.username}}/notes/add">Add Note</a>
 
 <form action="/users/{{user.username}}/delete" method="POST">
+  {{ form.hidden_tag() }}
   <button class="btn btn-danger">Delete User</button>
+</form>
+
+<form action="/logout" method="POST">
+  {{ form.hidden_tag() }}
+  <button class="btn btn-danger">Logout</button>
 </form>
 
 

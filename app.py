@@ -28,6 +28,18 @@ app.config["SECRET_KEY"] = "I'LL NEVER TELL!!"
 debug = DebugToolbarExtension(app)
 
 """Flask app for Flask Notes"""
+### Authentication functions ###
+
+def authenticate_login(f):
+    def wrapper():
+        if "username" not in session:
+            flash("You must be logged in to view page!")
+            return redirect("/")
+        # elif session["username"] != username:
+        #     flash("Unauthorized user!")
+        #     return redirect("/")
+    return wrapper
+
 
 #### Authentication Routes ###
 
@@ -112,6 +124,7 @@ def logout_user():
 
     if form.validate_on_submit():
         # Remove "username" if present, but no errors if it wasn't
+        print("\n\n\nworking\n\n\n")
         session.pop("username", None)
 
     return redirect("/")
@@ -119,22 +132,16 @@ def logout_user():
 
 ### User Routes ###
 
-
+@authenticate_login
 @app.get("/users/<username>")
 def display_user_info(username):
     """Display information about the user with the given username.
     Ensure users are logged in to see the page, else redirect to /login."""
 
-    if "username" not in session:
-        flash("You must be logged in to add a note!")
-        return redirect("/")
-    elif session["username"] != username:
-        flash("Invalid login credentials!")
-        return redirect("/")
-
     user = User.query.get_or_404(username)
+    form = CSRFProtectForm()
 
-    return render_template("user-info.html", user=user, notes=user.notes)
+    return render_template("user-info.html", user=user, notes=user.notes, form=form)
 
 
 @app.post("/users/<username>/delete")
@@ -142,14 +149,10 @@ def delete_user(username):
     """Deletes user from database and redirects to /"""
     form = CSRFProtectForm()
 
-    if form.validate_on_submit:
+    if form.validate_on_submit():
         user = User.query.get_or_404(username)
 
-        # TODO: make this not the n+1 query
-        notes = user.notes
-
-        for note in notes:
-            db.session.delete(note)
+        notes = Note.query.filter(Note.owner_username == username).delete()
 
         db.session.delete(user)
         db.session.commit()
@@ -163,17 +166,10 @@ def delete_user(username):
 
 ### NOTES ROUTES ###
 
-
+@authenticate_login
 @app.route("/users/<username>/notes/add", methods=["GET", "POST"])
 def display_or_add_note(username):
     """Produce add note form or handles add note form submission."""
-
-    if "username" not in session:
-        flash("You must be logged in to add a note!")
-        return redirect("/")
-    elif session["username"] != username:
-        flash("Unauthorized user!")
-        return redirect("/")
 
     form = AddNewNoteForm()
 
@@ -194,23 +190,12 @@ def display_or_add_note(username):
 
     return render_template("add-note.html", form=form)
 
-
+@authenticate_login
 @app.route("/notes/<int:note_id>/update", methods=["GET", "POST"])
 def edit_or_update_note(note_id):
     """Produce edit note form or handles edit note form submission."""
 
     note = Note.query.get_or_404(note_id)
-
-    # TODO: make a decorator -- a function that returns a function to be called
-    # when a route is reached
-
-    if "username" not in session:
-        flash("You must be logged in to edit a note!")
-        return redirect("/")
-    elif session["username"] != note.owner_username:
-        flash("Invalid login credentials!")
-        return redirect("/")
-
     form = EditNoteForm(obj=note)
 
     if form.validate_on_submit():
@@ -231,7 +216,7 @@ def delete_note(note_id):
 
     note = Note.query.get_or_404(note_id)
 
-    if form.validate_on_submit:
+    if form.validate_on_submit():
         db.session.delete(note)
         db.session.commit()
 
