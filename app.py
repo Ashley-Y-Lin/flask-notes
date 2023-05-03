@@ -28,16 +28,18 @@ app.config["SECRET_KEY"] = "I'LL NEVER TELL!!"
 debug = DebugToolbarExtension(app)
 
 """Flask app for Flask Notes"""
-### Authentication functions ###
+### Authentication Decorator ###
 
 def authenticate_login(f):
-    def wrapper():
-        if "username" not in session:
+    def wrapper(*args, **kwargs):
+        if not session.get("username"):
             flash("You must be logged in to view page!")
             return redirect("/")
         # elif session["username"] != username:
         #     flash("Unauthorized user!")
         #     return redirect("/")
+        return f(*args, **kwargs)
+
     return wrapper
 
 
@@ -132,8 +134,9 @@ def logout_user():
 
 ### User Routes ###
 
-@authenticate_login
+
 @app.get("/users/<username>")
+@authenticate_login
 def display_user_info(username):
     """Display information about the user with the given username.
     Ensure users are logged in to see the page, else redirect to /login."""
